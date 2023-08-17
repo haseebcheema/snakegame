@@ -2,7 +2,8 @@
 import pygame
 # importing the constants of pygame
 from pygame.locals import *
-
+# importing time module
+import time
 
 # game class
 class Game:
@@ -44,8 +45,13 @@ class Game:
                 elif event.type == QUIT:
                     running = False
 
-                # display the window screen
-                pygame.display.flip()
+            # change the direction
+            self.snake.walk()
+            #  continues walking in the particular direction after every given seconds
+            time.sleep(0.2)
+
+            # display the window screen
+            pygame.display.flip()
 
 # snake class
 class Snake:
@@ -56,8 +62,10 @@ class Snake:
         # setting the size of the block
         self.x = 100
         self.y = 100
+        #  setting inital movement of block
+        self.direction = "right"
 
-    # updations to move the block on the screen
+    # updations to draw/move the block on the screen
     def draw(self):
         # setting the bg color of the window screen
         self.parent_screen.fill((231, 221, 129))
@@ -65,24 +73,34 @@ class Snake:
         self.parent_screen.blit(self.block, (self.x, self.y))
         pygame.display.flip()
 
-    # move up
+    # update the direction for move up
     def move_up(self):
-        self.y = self.y - 10
-        self.draw()
+        self.direction = "up"
 
-    # move down
+    # update the direction for move down
     def move_down(self):
-        self.y = self.y + 10
-        self.draw()
+        self.direction = "down"
 
-    # move left
+    # update the direction for move left
     def move_left(self):
-        self.x = self.x - 10
-        self.draw()
+        self.direction = "left"
 
-    # move right
+    # update the direction for move right
     def move_right(self):
-        self.x = self.x + 10
+        self.direction = "right"
+
+    # walk method for the snake
+    def walk(self):
+        if self.direction == "up":
+            self.y = self.y - 10
+        elif self.direction == "down":
+            self.y = self.y + 10
+        elif self.direction == "left":
+            self.x = self.x - 10
+        elif self.direction == "right":
+            self.x = self.x + 10
+        
+        #  draw the block
         self.draw()
 
 if __name__ == "__main__":
