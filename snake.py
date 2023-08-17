@@ -1,9 +1,15 @@
 #  importing pygame
 import pygame
+
 # importing the constants of pygame
 from pygame.locals import *
+
 # importing time module
 import time
+
+# importing random module
+import random
+
 
 # global size value
 SIZE = 40
@@ -27,6 +33,11 @@ class Apple:
         # updating the display to show changes
         pygame.display.flip()
 
+    # shift apple to random position
+    def move(self):
+        self.x = random.randint(1, 19) * SIZE
+        self.y = random.randint(1, 14) * SIZE
+
 # game class
 class Game:
     def __init__(self):
@@ -38,7 +49,7 @@ class Game:
         self.screen = pygame.display.set_mode((800, 600))
 
         #  instance of snake
-        self.snake = Snake(self.screen, 5)
+        self.snake = Snake(self.screen, 2)
 
         # calling draw method of snake to draw block on the window screen
         self.snake.draw()
@@ -56,6 +67,30 @@ class Game:
 
         # draw apple
         self.apple.draw()
+
+        # display score
+        self.display_score()
+
+        # called when any update occurs
+        pygame.display.flip()
+
+        # check if apple collides with snake's head
+        if self.is_collision(self.snake.x[0], self.snake.y[0], self.apple.x, self.apple.y):
+            self.snake.increase_length()
+            self.apple.move()
+
+    # collision of snake with apple
+    def is_collision(self, x1, y1, x2, y2):
+        if x1 >= x2 and x1 <= x2 + SIZE:
+            if y1 >= y2 and y1 <= y2 + SIZE:
+                return True
+        return False
+
+    #  calculate score
+    def display_score(self):
+        font = pygame.font.SysFont("arial", 30)
+        score = font.render(f"Score: { self.snake.length }", True, (0, 0, 0))
+        self.screen.blit(score, (680, 10))
 
     # run
     def run(self):
@@ -122,6 +157,12 @@ class Snake:
         
         # updating the display to show changes
         pygame.display.flip()
+
+    #  increase snake's length and add block
+    def increase_length(self):
+        self.length = self.length + 1
+        self.x.append(-1)
+        self.y.append(-1)
 
     # update the direction for move up
     def move_up(self):
