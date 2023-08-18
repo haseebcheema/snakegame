@@ -11,8 +11,9 @@ import time
 import random
 
 
-# global size value
+# global size and background colour
 SIZE = 40
+BACKGROUND_COLOR = (231, 221, 129)
 
 # apple class
 class Apple:
@@ -49,7 +50,7 @@ class Game:
         self.screen = pygame.display.set_mode((800, 600))
 
         #  instance of snake
-        self.snake = Snake(self.screen, 2)
+        self.snake = Snake(self.screen, 1)
 
         # calling draw method of snake to draw block on the window screen
         self.snake.draw()
@@ -79,6 +80,20 @@ class Game:
             self.snake.increase_length()
             self.apple.move()
 
+        # check if snake collides with itself
+        for i in range(5, self.snake.length):
+            if self.is_collision(self.snake.x[0], self.snake.y[0], self.snake.x[i], self.snake.y[i]):
+                raise "GAME OVER!"
+    
+    # reset/restart the game
+    def reset(self):
+
+         # new instance of snake
+        self.snake = Snake(self.screen, 1)
+
+        # new instance of apple
+        self.apple = Apple(self.screen)
+
     # collision of snake with apple
     def is_collision(self, x1, y1, x2, y2):
         if x1 >= x2 and x1 <= x2 + SIZE:
@@ -86,18 +101,30 @@ class Game:
                 return True
         return False
 
-    #  calculate score
+    # calculate score
     def display_score(self):
         font = pygame.font.SysFont("arial", 30)
         score = font.render(f"Score: { self.snake.length }", True, (0, 0, 0))
         self.screen.blit(score, (680, 10))
 
+    # game over
+    def show_game_over(self):
+        self.screen.fill(BACKGROUND_COLOR)
+        font = pygame.font.SysFont("arial", 30)
+        line1 = font.render(f"Game is over! Score: { self.snake.length }", True, (0, 0, 0))
+        self.screen.blit(line1, (300, 300))
+        line2 = font.render("To play again, press Enter otherwise press Escape to exit!", True, (0, 0, 0))
+        self.screen.blit(line2, (120, 350))
+        pygame.display.flip()
+    
     # run
     def run(self):
 
         # instance for running the snake game
         running = True
 
+        # instance for pausing the snake game
+        pause = False
         # loop to run and end the window screen
         while running:
             # poll for events
@@ -106,23 +133,32 @@ class Game:
                 if event.type == KEYDOWN:
                     if event.key == K_ESCAPE:
                         running = False
-                    if event.key == K_UP:
-                        # move up
-                        self.snake.move_up()
-                    if event.key == K_DOWN:
-                        # move down
-                        self.snake.move_down()
-                    if event.key == K_LEFT:
-                        # move left
-                        self.snake.move_left()
-                    if event.key == K_RIGHT:
-                        # move right
-                        self.snake.move_right()
+                    if event.key == K_RETURN:
+                        pause = False
+                    if not pause:
+                        if event.key == K_UP:
+                            # move up
+                            self.snake.move_up()
+                        if event.key == K_DOWN:
+                            # move down
+                            self.snake.move_down()
+                        if event.key == K_LEFT:
+                            # move left
+                            self.snake.move_left()
+                        if event.key == K_RIGHT:
+                            # move right
+                            self.snake.move_right()
                 elif event.type == QUIT:
                     running = False
 
-            # play
-            self.play()
+            try:
+                if not pause:
+                    self.play()
+            except Exception as e:
+                self.show_game_over()
+                pause = True
+                self.reset()
+
 
             #  continues walking in the particular direction after every given seconds
             time.sleep(0.2)
@@ -149,7 +185,7 @@ class Snake:
     def draw(self):
 
         # setting the bg color of the window screen
-        self.parent_screen.fill((231, 221, 129))
+        self.parent_screen.fill(BACKGROUND_COLOR)
         
         # showing blocks on the window screen
         for i in range(self.length):
