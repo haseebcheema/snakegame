@@ -46,6 +46,9 @@ class Game:
         # pygame setup
         pygame.init()
 
+         # pygame music setup
+        pygame.mixer.init()
+
         # setup of window screen
         self.screen = pygame.display.set_mode((800, 600))
 
@@ -60,6 +63,9 @@ class Game:
 
         # calling draw method of apple to draw it on the window screen
         self.apple.draw()
+
+        # play bg music
+        self.play_bg()
     
     # play
     def play(self):
@@ -77,14 +83,26 @@ class Game:
 
         # check if apple collides with snake's head
         if self.is_collision(self.snake.x[0], self.snake.y[0], self.apple.x, self.apple.y):
+            self.play_sound("ding")
             self.snake.increase_length()
             self.apple.move()
 
         # check if snake collides with itself
-        for i in range(5, self.snake.length):
+        for i in range(3, self.snake.length):
             if self.is_collision(self.snake.x[0], self.snake.y[0], self.snake.x[i], self.snake.y[i]):
+                self.play_sound("crash")
                 raise "GAME OVER!"
-    
+
+    # play sound
+    def play_sound(self, sound):
+        sound = pygame.mixer.Sound(f"./resources/{sound}.mp3")
+        pygame.mixer.Sound.play(sound)
+
+    # play bg music
+    def play_bg(self):
+        pygame.mixer.music.load("./resources/bg_music_1.mp3")
+        pygame.mixer.music.play(-1, 0)
+
     # reset/restart the game
     def reset(self):
 
@@ -109,6 +127,10 @@ class Game:
 
     # game over
     def show_game_over(self):
+
+        # pause the bg music
+        pygame.mixer.music.pause()
+
         self.screen.fill(BACKGROUND_COLOR)
         font = pygame.font.SysFont("arial", 30)
         line1 = font.render(f"Game is over! Score: { self.snake.length }", True, (0, 0, 0))
@@ -134,6 +156,8 @@ class Game:
                     if event.key == K_ESCAPE:
                         running = False
                     if event.key == K_RETURN:
+                        # unpause the bg music
+                        pygame.mixer.music.unpause()
                         pause = False
                     if not pause:
                         if event.key == K_UP:
@@ -156,6 +180,7 @@ class Game:
                     self.play()
             except Exception as e:
                 self.show_game_over()
+                
                 pause = True
                 self.reset()
 
